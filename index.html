@@ -1,102 +1,48 @@
-
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DevLearning Hub - Full Stack Scripting</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        darkMode: 'class',
-      }
-    </script>
-    <!-- Prism.js Tomorrow Night Theme -->
+    
+    <!-- SEO Meta Tags -->
+    <title>DevLearning Hub - Master Full Stack Scripting</title>
+    <meta name="description" content="Master JavaScript, TypeScript, Go, Python, and more. Interactive tutorials and offline-ready learning platform.">
+    <meta name="keywords" content="javascript, typescript, golang, python, nodejs, coding tutorials, programming">
+    <meta name="author" content="Noam Gold AI">
+    
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="DevLearning Hub">
+    <meta property="og:description" content="Comprehensive coding tutorials for modern developers.">
+    <meta property="og:image" content="https://raw.githubusercontent.com/google/material-design-icons/master/png/action/code/materialicons/24dp/2x/baseline_code_black_24dp.png">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/google/material-design-icons/master/png/action/code/materialicons/24dp/2x/baseline_code_black_24dp.png">
+
+    <!-- Google AdSense Placeholder -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="index.css">
+    
+    <!-- Prism.js Theme -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
-    <style>
-      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-      body {
-        font-family: 'Inter', sans-serif;
-        transition: background-color 0.3s ease, color 0.3s ease;
-      }
-      .font-size-small { font-size: 0.875rem; }
-      .font-size-medium { font-size: 1rem; }
-      .font-size-large { font-size: 1.25rem; }
 
-      [dir="rtl"] {
-        font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      }
-
-      .highlight-match {
-        background-color: rgba(59, 130, 246, 0.4);
-        border-bottom: 2px solid #3b82f6;
-        border-radius: 2px;
-        font-weight: 600;
-        color: inherit;
-      }
-
-      pre[class*="language-"] {
-        margin: 0 !important;
-        padding: 1rem !important;
-        background: transparent !important;
-        font-size: 0.75rem !important;
-      }
-
-      code[class*="language-"] {
-        font-family: 'Fira Code', 'Courier New', Courier, monospace !important;
-        text-shadow: none !important;
-      }
-
-      .token.comment { color: #64748b !important; }
-      
-      @keyframes pulse-highlight {
-        0% { background-color: rgba(59, 130, 246, 0.3); }
-        50% { background-color: rgba(59, 130, 246, 0.5); }
-        100% { background-color: rgba(59, 130, 246, 0.3); }
-      }
-      .highlight-match {
-        animation: pulse-highlight 2s infinite ease-in-out;
-      }
-
-      /* Custom Tooltip Styling */
-      .has-tooltip {
-        position: relative;
-      }
-      .tooltip {
-        visibility: hidden;
-        position: absolute;
-        bottom: 120%;
-        left: 50%;
-        transform: translateX(-50%);
-        background-color: #1e293b;
-        color: #f1f5f9;
-        text-align: center;
-        padding: 4px 8px;
-        border-radius: 6px;
-        font-size: 10px;
-        white-space: nowrap;
-        z-index: 100;
-        opacity: 0;
-        transition: opacity 0.2s ease;
-      }
-      .has-tooltip:hover .tooltip {
-        visibility: visible;
-        opacity: 1;
-      }
-    </style>
 <script type="importmap">
 {
   "imports": {
-    "react/": "https://esm.sh/react@^19.2.3/",
     "react": "https://esm.sh/react@^19.2.3",
+    "react-dom": "https://esm.sh/react-dom@^19.2.3",
+    "react-dom/client": "https://esm.sh/react-dom@^19.2.3/client",
     "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "@google/genai": "https://esm.sh/@google/genai@^1.36.0"
+    "react/": "https://esm.sh/react@^19.2.3/"
   }
 }
 </script>
 </head>
 <body class="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 min-h-screen">
     <div id="root"></div>
+    <!-- Syntax Highlighting Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-typescript.min.js"></script>
@@ -106,7 +52,8 @@
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js').catch(err => console.error('SW registration failed:', err));
+          // Use a relative path to ensure the Service Worker is registered on the correct origin
+          navigator.serviceWorker.register('./sw.js').catch(err => console.error('SW registration failed:', err));
         });
       }
     </script>

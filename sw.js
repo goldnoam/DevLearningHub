@@ -1,12 +1,13 @@
-
-const CACHE_NAME = 'devlearning-hub-v1';
+const CACHE_NAME = 'devlearning-hub-v3';
 const ASSETS = [
-  '/',
-  '/index.html',
-  '/index.tsx',
-  '/types.ts',
-  '/constants.ts',
-  'https://cdn.tailwindcss.com',
+  './',
+  './index.html',
+  './index.tsx',
+  './App.tsx',
+  './index.css',
+  './types.ts',
+  './constants.ts',
+  './components/SearchInput.tsx',
   'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap'
 ];
 
@@ -22,6 +23,16 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request).then((response) => {
       return response || fetch(event.request);
+    })
+  );
+});
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((keys) => {
+      return Promise.all(
+        keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
+      );
     })
   );
 });

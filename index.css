@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  transition: background-color 0.3s ease, color 0.3s ease;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+.font-size-small { font-size: 0.875rem; }
+.font-size-medium { font-size: 1rem; }
+.font-size-large { font-size: 1.25rem; }
+
+[dir="rtl"] {
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.highlight-match {
+  background-color: rgba(59, 130, 246, 0.4);
+  border-bottom: 2px solid #3b82f6;
+  border-radius: 2px;
+}
+
+pre[class*="language-"] {
+  margin: 0 !important;
+  padding: 1rem !important;
+  background: transparent !important;
+  font-size: 0.85em !important;
+}
+
+code[class*="language-"] {
+  text-shadow: none !important;
+}
+
+/* Custom Tooltip */
+.has-tooltip {
+  position: relative;
+}
+.tooltip {
+  visibility: hidden;
+  position: absolute;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #1e293b;
+  color: #f1f5f9;
+  text-align: center;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 10px;
+  white-space: nowrap;
+  z-index: 100;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.has-tooltip:hover .tooltip {
+  visibility: visible;
+  opacity: 1;
+}

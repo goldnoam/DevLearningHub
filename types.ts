@@ -29,8 +29,6 @@ export interface Translation {
   copyLabel: string;
   shareLabel: string;
   exportCodeLabel: string;
-  aiExplainLabel: string;
-  aiLoadingLabel: string;
   accessibilityTitle: string;
   accessibilityContent: string;
   closeLabel: string;
