@@ -6,26 +6,26 @@
     
     <!-- SEO Meta Tags -->
     <title>DevLearning Hub - Master Full Stack Scripting</title>
-    <meta name="description" content="Master JavaScript, TypeScript, Go, Python, and more. Interactive tutorials and offline-ready learning platform.">
-    <meta name="keywords" content="javascript, typescript, golang, python, nodejs, coding tutorials, programming">
+    <meta name="description" content="Master JavaScript, TypeScript, Go, Python, and more. Interactive tutorials and offline-ready learning platform. Master Go, JS and TS with our specialized courses.">
+    <meta name="keywords" content="javascript, typescript, golang, python, nodejs, coding tutorials, programming, learn go, learn typescript">
     <meta name="author" content="Noam Gold AI">
     
     <!-- Open Graph -->
     <meta property="og:type" content="website">
     <meta property="og:title" content="DevLearning Hub">
-    <meta property="og:description" content="Comprehensive coding tutorials for modern developers.">
+    <meta property="og:description" content="Comprehensive coding tutorials for modern developers focusing on Go, JavaScript, and TypeScript.">
     <meta property="og:image" content="https://raw.githubusercontent.com/google/material-design-icons/master/png/action/code/materialicons/24dp/2x/baseline_code_black_24dp.png">
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/google/material-design-icons/master/png/action/code/materialicons/24dp/2x/baseline_code_black_24dp.png">
 
-    <!-- Google AdSense Placeholder -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-0274741291001288" crossorigin="anonymous"></script>
 
     <!-- Styles -->
     <link rel="stylesheet" href="index.css">
     
-    <!-- Prism.js Theme -->
+    <!-- Syntax Highlighting (Prism) -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
 
 <script type="importmap">
@@ -43,7 +43,21 @@
 </script>
 </head>
 <body class="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 min-h-screen">
+    <!-- AdSense Placeholder -->
+    <div class="max-w-6xl mx-auto px-4 mt-2">
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-0274741291001288"
+           data-ad-slot="XXXXXXXXXX"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>
+           (adsbygoogle = window.adsbygoogle || []).push({});
+      </script>
+    </div>
+
     <div id="root"></div>
+
     <!-- Syntax Highlighting Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
@@ -51,15 +65,20 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-go.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-ruby.min.js"></script>
+    
+    <!-- Service Worker Registration -->
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-          // Changed to absolute path for the domain root
-          navigator.serviceWorker.register('/sw.js').catch(err => {
-            console.debug('SW registration skipped or failed in this environment:', err);
+          navigator.serviceWorker.register('./sw.js').then(registration => {
+            console.log('SW registered: ', registration.scope);
+          }).catch(err => {
+            console.debug('SW registration skipped or failed:', err);
           });
         });
       }
     </script>
+    
+    <script type="module" src="./index.tsx"></script>
 </body>
 </html>
