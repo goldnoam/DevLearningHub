@@ -11,7 +11,6 @@ const Highlight: React.FC<{ text: string; query: string }> = ({ text, query }) =
     <>
       {parts.map((part, i) => 
         part.toLowerCase() === query.toLowerCase() 
-          // Removed duplicated key attribute
           ? <span key={i} className="highlight-match">{part}</span> 
           : part
       )}
@@ -19,8 +18,52 @@ const Highlight: React.FC<{ text: string; query: string }> = ({ text, query }) =
   );
 };
 
+const ShareModal: React.FC<{ isOpen: boolean; onClose: () => void; t: Translation; title: string }> = ({ isOpen, onClose, t, title }) => {
+  if (!isOpen) return null;
+  const shareUrl = window.location.href;
+
+  const shareOptions = [
+    { name: 'X / Twitter', icon: 'M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z', color: 'bg-black', link: `https://twitter.com/intent/tweet?text=Check out this ${title} tutorial on DevLearning Hub!&url=${encodeURIComponent(shareUrl)}` },
+    { name: 'LinkedIn', icon: 'M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z', color: 'bg-[#0077b5]', link: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}` },
+    { name: 'Facebook', icon: 'M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z', color: 'bg-[#1877f2]', link: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}` },
+  ];
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in" onClick={onClose}>
+      <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-slate-200 dark:border-slate-700 animate-in zoom-in-95" onClick={e => e.stopPropagation()}>
+        <div className="flex justify-between items-center mb-6">
+          <h3 className="text-xl font-bold">{t.shareLabel}</h3>
+          <button onClick={onClose} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-colors">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+          </button>
+        </div>
+        <div className="grid grid-cols-3 gap-4 mb-6">
+          {shareOptions.map(opt => (
+            <a key={opt.name} href={opt.link} target="_blank" rel="noopener noreferrer" className="flex flex-col items-center gap-2 group">
+              <div className={`w-12 h-12 ${opt.color} rounded-2xl flex items-center justify-center text-white shadow-lg group-hover:scale-110 transition-transform`}>
+                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d={opt.icon} /></svg>
+              </div>
+              <span className="text-[10px] font-bold text-slate-500">{opt.name}</span>
+            </a>
+          ))}
+        </div>
+        <div className="relative">
+          <input readOnly value={shareUrl} className="w-full bg-slate-100 dark:bg-slate-900 border-none rounded-xl py-3 pl-4 pr-12 text-xs font-mono text-slate-500 focus:ring-2 focus:ring-blue-500 outline-none" />
+          <button 
+            onClick={() => { navigator.clipboard.writeText(shareUrl); alert('URL Copied!'); }}
+            className="absolute right-2 top-1.5 p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" /></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const CodeBlock: React.FC<{ code: string; category: string; query: string; title: string; t: Translation }> = ({ code, category, query, title, t }) => {
   const codeRef = useRef<HTMLElement>(null);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   
   const prismLang = useMemo(() => {
     const map: Record<string, string> = {
@@ -35,27 +78,70 @@ const CodeBlock: React.FC<{ code: string; category: string; query: string; title
     }
   }, [code, prismLang]);
 
+  const handleCopy = () => {
+    navigator.clipboard.writeText(code);
+    // Simple toast replacement
+    const btn = document.getElementById(`copy-${title}`);
+    if (btn) {
+      const original = btn.innerHTML;
+      btn.innerHTML = '<svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
+      setTimeout(() => btn.innerHTML = original, 2000);
+    }
+  };
+
+  const handleExport = () => {
+    const blob = new Blob([code], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${title.toLowerCase().replace(/\s+/g, '-')}.${prismLang === 'javascript' ? 'js' : prismLang === 'typescript' ? 'ts' : prismLang === 'python' ? 'py' : 'txt'}`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   return (
-    <div className="mt-4 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-950 shadow-sm flex flex-col">
-      <div className="flex items-center justify-between px-3 py-1.5 bg-slate-800/80 border-b border-slate-700">
-        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{prismLang}</span>
-        <div className="flex items-center gap-1.5">
-          <button 
-            onClick={() => navigator.clipboard.writeText(code)}
-            className="has-tooltip p-1 text-slate-400 hover:text-white transition-colors"
-            aria-label={t.copyLabel}
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" /></svg>
-            <span className="tooltip">{t.copyLabel}</span>
-          </button>
+    <>
+      <div className="mt-4 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-950 shadow-sm flex flex-col">
+        <div className="flex items-center justify-between px-3 py-1.5 bg-slate-800/80 border-b border-slate-700">
+          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{prismLang}</span>
+          <div className="flex items-center gap-1.5">
+            <button 
+              id={`copy-${title}`}
+              onClick={handleCopy}
+              className="has-tooltip p-1.5 text-slate-400 hover:text-white transition-colors hover:bg-slate-700 rounded-md"
+              aria-label={t.copyLabel}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" /></svg>
+              <span className="tooltip">{t.copyLabel}</span>
+            </button>
+            <button 
+              onClick={() => setIsShareModalOpen(true)}
+              className="has-tooltip p-1.5 text-slate-400 hover:text-white transition-colors hover:bg-slate-700 rounded-md"
+              aria-label={t.shareLabel}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6L15.316 7.342m0 9.316a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0-9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" /></svg>
+              <span className="tooltip">{t.shareLabel}</span>
+            </button>
+            <button 
+              onClick={handleExport}
+              className="has-tooltip p-1.5 text-slate-400 hover:text-white transition-colors hover:bg-slate-700 rounded-md"
+              aria-label={t.exportCodeLabel}
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+              <span className="tooltip">{t.exportCodeLabel}</span>
+            </button>
+          </div>
+        </div>
+        <div className="bg-slate-950 overflow-x-auto">
+          <pre className={`language-${prismLang}`}>
+            <code ref={codeRef} className={`language-${prismLang}`}>{code}</code>
+          </pre>
         </div>
       </div>
-      <div className="bg-slate-950 overflow-x-auto">
-        <pre className={`language-${prismLang}`}>
-          <code ref={codeRef} className={`language-${prismLang}`}>{code}</code>
-        </pre>
-      </div>
-    </div>
+      <ShareModal isOpen={isShareModalOpen} onClose={() => setIsShareModalOpen(false)} t={t} title={title} />
+    </>
   );
 };
 
