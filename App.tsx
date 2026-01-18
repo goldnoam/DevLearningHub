@@ -11,6 +11,7 @@ const Highlight: React.FC<{ text: string; query: string }> = ({ text, query }) =
     <>
       {parts.map((part, i) => 
         part.toLowerCase() === query.toLowerCase() 
+          // Removed duplicated key attribute
           ? <span key={i} className="highlight-match">{part}</span> 
           : part
       )}
@@ -49,7 +50,7 @@ const CodeBlock: React.FC<{ code: string; category: string; query: string; title
           </button>
         </div>
       </div>
-      <div className="bg-slate-950">
+      <div className="bg-slate-950 overflow-x-auto">
         <pre className={`language-${prismLang}`}>
           <code ref={codeRef} className={`language-${prismLang}`}>{code}</code>
         </pre>
@@ -67,47 +68,114 @@ const LogicGame: React.FC<{ t: Translation }> = ({ t }) => {
     if (paused) return;
     setPos(p => {
       let { x, y } = p;
-      if (dir === 'w') y = Math.max(0, y - 5);
-      if (dir === 's') y = Math.min(100, y + 5);
-      if (dir === 'a') x = Math.max(0, x - 5);
-      if (dir === 'd') x = Math.min(100, x + 5);
+      if (dir === 'w') y = Math.max(2, y - 8);
+      if (dir === 's') y = Math.min(98, y + 8);
+      if (dir === 'a') x = Math.max(2, x - 8);
+      if (dir === 'd') x = Math.min(98, x + 8);
       return { x, y };
     });
   };
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
-      if (['w', 'a', 's', 'd'].includes(e.key.toLowerCase())) move(e.key.toLowerCase() as any);
-      if (e.key === ' ') setPaused(p => !p);
+      const key = e.key.toLowerCase();
+      if (['w', 'a', 's', 'd'].includes(key)) {
+        e.preventDefault();
+        move(key as any);
+      }
+      if (e.key === ' ') {
+        e.preventDefault();
+        setPaused(p => !p);
+      }
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
   }, [paused]);
 
   return (
-    <div className="p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 mb-12">
-      <div className="flex justify-between items-center mb-4">
-        <h4 className="font-bold">Logic Lab: Interactive WASD Controls</h4>
+    <div className="p-6 bg-slate-50 dark:bg-slate-800/50 rounded-3xl border border-slate-200 dark:border-slate-700 mb-12 shadow-sm">
+      <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+        <div>
+          <h4 className="font-bold text-lg">Logic Lab: Interactive Playground</h4>
+          <p className="text-xs text-slate-500">Test your reflexes and spatial logic</p>
+        </div>
         <div className="flex gap-2">
-          <button onClick={() => setPaused(!paused)} className="p-2 px-4 bg-blue-600 text-white rounded-lg text-xs font-bold hover:bg-blue-700 transition-colors">
+          <button 
+            onClick={() => setPaused(!paused)} 
+            className={`p-2 px-6 rounded-xl text-xs font-bold transition-all ${paused ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-blue-600 hover:bg-blue-700 text-white'}`}
+          >
             {paused ? 'Resume' : 'Pause'}
           </button>
-          <button onClick={() => setPos({ x: 50, y: 50 })} className="p-2 px-4 bg-slate-400 dark:bg-slate-600 text-white rounded-lg text-xs font-bold hover:bg-slate-500 transition-colors">Reset</button>
+          <button 
+            onClick={() => setPos({ x: 50, y: 50 })} 
+            className="p-2 px-6 bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold hover:bg-slate-300 dark:hover:bg-slate-600 transition-all"
+          >
+            Reset
+          </button>
         </div>
       </div>
-      <div className="relative h-48 bg-slate-900 rounded-xl overflow-hidden border border-slate-700" ref={gameRef}>
-        <div 
-          className="absolute w-4 h-4 bg-blue-500 rounded-full shadow-lg shadow-blue-500/50 transition-all duration-75"
-          style={{ left: `${pos.x}%`, top: `${pos.y}%`, transform: 'translate(-50%, -50%)' }}
-        />
-        <div className="absolute bottom-2 left-2 text-[10px] text-slate-500 font-mono">Use Keyboard WASD or Buttons Below</div>
-      </div>
-      <div className="flex flex-col items-center mt-4 gap-1">
-        <button onClick={() => move('w')} className="p-3 bg-slate-200 dark:bg-slate-700 rounded-lg font-bold w-12 hover:bg-slate-300 dark:hover:bg-slate-600">W</button>
-        <div className="flex gap-1">
-          <button onClick={() => move('a')} className="p-3 bg-slate-200 dark:bg-slate-700 rounded-lg font-bold w-12 hover:bg-slate-300 dark:hover:bg-slate-600">A</button>
-          <button onClick={() => move('s')} className="p-3 bg-slate-200 dark:bg-slate-700 rounded-lg font-bold w-12 hover:bg-slate-300 dark:hover:bg-slate-600">S</button>
-          <button onClick={() => move('d')} className="p-3 bg-slate-200 dark:bg-slate-700 rounded-lg font-bold w-12 hover:bg-slate-300 dark:hover:bg-slate-600">D</button>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+        <div className="relative h-64 bg-slate-900 rounded-2xl overflow-hidden border border-slate-700 shadow-inner group" ref={gameRef}>
+          <div 
+            className={`absolute w-6 h-6 rounded-lg shadow-xl transition-all duration-150 ${paused ? 'bg-slate-600' : 'bg-blue-500 animate-pulse'}`}
+            style={{ 
+              left: `${pos.x}%`, 
+              top: `${pos.y}%`, 
+              transform: 'translate(-50%, -50%)',
+              boxShadow: paused ? 'none' : '0 0 20px rgba(59, 130, 246, 0.6)'
+            }}
+          />
+          {paused && (
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px] flex items-center justify-center">
+              <span className="text-white font-bold tracking-widest text-xl uppercase">Paused</span>
+            </div>
+          )}
+          <div className="absolute bottom-3 left-3 text-[10px] text-slate-500 font-mono bg-slate-900/80 px-2 py-1 rounded">
+            Pos: {Math.round(pos.x)}, {Math.round(pos.y)}
+          </div>
+        </div>
+
+        <div className="flex flex-col items-center gap-4">
+          <div className="text-center">
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-4">Mobile Controls (WASD)</p>
+            <div className="flex flex-col items-center gap-2">
+              <button 
+                onMouseDown={() => move('w')} 
+                className="p-5 bg-white dark:bg-slate-700 rounded-2xl shadow-md active:scale-95 transition-transform border border-slate-200 dark:border-slate-600 flex flex-col items-center justify-center"
+                aria-label="Move Up (W)"
+              >
+                <span className="text-xs font-bold mb-1">W</span>
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 15l7-7 7 7" /></svg>
+              </button>
+              <div className="flex gap-2">
+                <button 
+                  onMouseDown={() => move('a')} 
+                  className="p-5 bg-white dark:bg-slate-700 rounded-2xl shadow-md active:scale-95 transition-transform border border-slate-200 dark:border-slate-600 flex flex-col items-center justify-center"
+                  aria-label="Move Left (A)"
+                >
+                  <span className="text-xs font-bold mb-1">A</span>
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" /></svg>
+                </button>
+                <button 
+                  onMouseDown={() => move('s')} 
+                  className="p-5 bg-white dark:bg-slate-700 rounded-2xl shadow-md active:scale-95 transition-transform border border-slate-200 dark:border-slate-600 flex flex-col items-center justify-center"
+                  aria-label="Move Down (S)"
+                >
+                  <span className="text-xs font-bold mb-1">S</span>
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" /></svg>
+                </button>
+                <button 
+                  onMouseDown={() => move('d')} 
+                  className="p-5 bg-white dark:bg-slate-700 rounded-2xl shadow-md active:scale-95 transition-transform border border-slate-200 dark:border-slate-600 flex flex-col items-center justify-center"
+                  aria-label="Move Right (D)"
+                >
+                  <span className="text-xs font-bold mb-1">D</span>
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" /></svg>
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -137,16 +205,37 @@ const App: React.FC = () => {
     document.documentElement.lang = lang;
   }, [lang, fontSize, currentLangData]);
 
+  // Handle keyboard shortcuts
+  useEffect(() => {
+    const handleShortcuts = (e: KeyboardEvent) => {
+      if (e.altKey && e.shiftKey) {
+        switch (e.key.toLowerCase()) {
+          case 't': setTheme(prev => prev === 'dark' ? 'light' : 'dark'); break;
+          case 'l': 
+            const nextLangIdx = (LANGUAGES.findIndex(l => l.code === lang) + 1) % LANGUAGES.length;
+            setLang(LANGUAGES[nextLangIdx].code);
+            break;
+          case 'f':
+            const sizes: FontSize[] = ['small', 'medium', 'large'];
+            const nextSizeIdx = (sizes.indexOf(fontSize) + 1) % sizes.length;
+            setFontSize(sizes[nextSizeIdx]);
+            break;
+          case 's':
+            searchInputRef.current?.focus();
+            break;
+        }
+      }
+    };
+    window.addEventListener('keydown', handleShortcuts);
+    return () => window.removeEventListener('keydown', handleShortcuts);
+  }, [lang, fontSize]);
+
   const speakText = (text: string) => {
     if (!window.speechSynthesis) return;
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = lang === 'he' ? 'he-IL' : 
-                     lang === 'zh' ? 'zh-CN' : 
-                     lang === 'hi' ? 'hi-IN' : 
-                     lang === 'de' ? 'de-DE' : 
-                     lang === 'es' ? 'es-ES' : 
-                     lang === 'fr' ? 'fr-FR' : 'en-US';
+    const langMap: Record<string, string> = { he: 'he-IL', zh: 'zh-CN', hi: 'hi-IN', de: 'de-DE', es: 'es-ES', f: 'fr-FR' };
+    utterance.lang = langMap[lang] || 'en-US';
     window.speechSynthesis.speak(utterance);
   };
 
@@ -166,31 +255,36 @@ const App: React.FC = () => {
     <div className={`flex flex-col min-h-screen transition-all duration-300 ${fontSizeClass} bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100`}>
       <header className="sticky top-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 py-4" role="banner">
         <div className="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-xl" aria-hidden="true">D</div>
-            <h1 className="text-xl font-bold tracking-tight">{t.title}</h1>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-blue-500/20" aria-hidden="true">D</div>
+            <h1 className="text-xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-400">
+              {t.title}
+            </h1>
           </div>
 
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-green-500 bg-green-500/10 px-2 py-1 rounded">
+          <div className="flex items-center gap-3 flex-wrap">
+            <div className="hidden sm:flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-green-600 dark:text-green-400 bg-green-500/10 px-3 py-1.5 rounded-full border border-green-500/20">
               <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
               {t.offlineMode}
-            </span>
+            </div>
+            
+            <div className="h-6 w-[1px] bg-slate-200 dark:bg-slate-700 hidden md:block"></div>
+
             <select 
               value={lang} 
               onChange={(e) => setLang(e.target.value as Language)}
-              className="bg-slate-100 dark:bg-slate-800 border-none rounded-lg px-2 py-1 text-sm focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer"
+              className="bg-slate-100 dark:bg-slate-800 border-none rounded-xl px-3 py-2 text-sm font-medium focus:ring-2 focus:ring-blue-500 outline-none cursor-pointer hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
               aria-label="Switch Language"
             >
               {LANGUAGES.map(l => <option key={l.code} value={l.code}>{l.label}</option>)}
             </select>
 
-            <div className="flex bg-slate-100 dark:bg-slate-800 rounded-lg p-1 gap-1" role="group" aria-label="Adjust Font Size">
+            <div className="flex bg-slate-100 dark:bg-slate-800 rounded-xl p-1 gap-1" role="group" aria-label="Adjust Font Size">
               {(['small', 'medium', 'large'] as FontSize[]).map(size => (
                 <button
                   key={size}
                   onClick={() => setFontSize(size)}
-                  className={`px-3 py-1 rounded-md text-xs transition-colors ${fontSize === size ? 'bg-white dark:bg-slate-700 shadow-sm font-bold' : 'hover:bg-slate-200 dark:hover:bg-slate-700'}`}
+                  className={`px-3 py-1 rounded-lg text-xs transition-all duration-200 ${fontSize === size ? 'bg-white dark:bg-slate-600 shadow-sm font-bold text-blue-600 dark:text-white' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-300'}`}
                   aria-pressed={fontSize === size}
                 >
                   {size.charAt(0).toUpperCase()}
@@ -200,7 +294,7 @@ const App: React.FC = () => {
 
             <button 
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-              className="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+              className="p-2.5 bg-slate-100 dark:bg-slate-800 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition-all border border-transparent active:scale-95"
               aria-label="Toggle Dark Mode"
             >
               {theme === 'dark' ? (
@@ -209,26 +303,17 @@ const App: React.FC = () => {
                 <svg className="w-5 h-5 text-slate-700" fill="currentColor" viewBox="0 0 20 20"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" /></svg>
               )}
             </button>
-
-            <button 
-              onClick={() => speakText(`${t.title}. ${t.subtitle}`)}
-              className="p-2 bg-slate-100 dark:bg-slate-800 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700"
-              title={t.ttsEnable}
-              aria-label={t.ttsEnable}
-            >
-              <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" /></svg>
-            </button>
           </div>
         </div>
       </header>
 
-      <section className="bg-gradient-to-b from-blue-50 to-white dark:from-slate-800 dark:to-slate-900 pt-16 pb-20 px-4 text-center">
+      <section className="bg-gradient-to-b from-blue-50/50 to-white dark:from-slate-800/30 dark:to-slate-900 pt-16 pb-20 px-4 text-center">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-4xl md:text-6xl font-extrabold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-500 dark:from-blue-400 dark:to-indigo-300">
+          <h2 className="text-4xl md:text-6xl font-extrabold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-500 dark:from-blue-400 dark:to-indigo-300 leading-tight">
             {t.subtitle}
           </h2>
-          <SearchInput ref={searchInputRef} t={t} onSearch={setSearchQuery} suggestions={[]} />
-          <p className="text-xs text-slate-400 font-mono mt-4">{t.shortcutsInfo}</p>
+          <SearchInput ref={searchInputRef} t={t} onSearch={setSearchQuery} suggestions={['TypeScript', 'JavaScript', 'Golang', 'Python', 'Node.js', 'Closure', 'Channels', 'Generators']} />
+          <p className="text-xs text-slate-400 font-mono mt-4 opacity-70">{t.shortcutsInfo}</p>
         </div>
       </section>
 
@@ -237,29 +322,32 @@ const App: React.FC = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredCourses.map(course => (
-            <article key={course.id} className="bg-white dark:bg-slate-800 rounded-2xl p-6 shadow-lg border border-slate-100 dark:border-slate-700 flex flex-col h-full hover:shadow-xl transition-shadow group">
-              <div className="flex justify-between items-start mb-4">
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 uppercase">
+            <article key={course.id} className="bg-white dark:bg-slate-800/40 rounded-3xl p-8 shadow-sm border border-slate-100 dark:border-slate-700/50 flex flex-col h-full hover:shadow-xl hover:border-blue-500/30 transition-all group backdrop-blur-sm">
+              <div className="flex justify-between items-start mb-6">
+                <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 uppercase tracking-widest border border-blue-200/50 dark:border-blue-700/30">
                   {course.category}
                 </span>
                 <button 
                   onClick={() => speakText(course.title)}
-                  className="p-1 text-slate-400 hover:text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                  className="p-2 text-slate-400 hover:text-blue-500 bg-slate-50 dark:bg-slate-700/50 rounded-lg opacity-0 group-hover:opacity-100 transition-all"
                   aria-label="Speak Title"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072M12 5v14l-6.293-6.293H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.707L12 5z" /></svg>
                 </button>
               </div>
-              <h3 className="text-xl font-bold mb-4">
+              <h3 className="text-2xl font-bold mb-6">
                 <Highlight text={course.title} query={searchQuery} />
               </h3>
-              <div className="space-y-6 flex-grow">
+              <div className="space-y-8 flex-grow">
                 {course.modules.map(mod => (
-                  <div key={mod.id}>
-                    <h4 className="font-semibold text-sm mb-1">
-                      <Highlight text={mod.title} query={searchQuery} />
-                    </h4>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                  <div key={mod.id} className="relative">
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
+                      <h4 className="font-bold text-sm">
+                        <Highlight text={mod.title} query={searchQuery} />
+                      </h4>
+                    </div>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-4">
                       <Highlight text={mod.description} query={searchQuery} />
                     </p>
                     {mod.code && <CodeBlock code={mod.code} category={course.category} query={searchQuery} title={mod.title} t={t} />}
@@ -269,18 +357,59 @@ const App: React.FC = () => {
             </article>
           ))}
         </div>
+
+        {/* Developer Survey Integration */}
+        <section className="mt-20 p-8 bg-blue-600 rounded-3xl text-white text-center shadow-2xl shadow-blue-500/20">
+          <h3 className="text-2xl font-bold mb-4">Stay Ahead of the Curve</h3>
+          <p className="text-blue-100 mb-6 max-w-2xl mx-auto">
+            {t.surveyLinkText}
+          </p>
+          <a 
+            href="https://survey.stackoverflow.co/2024/" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-8 py-3 bg-white text-blue-600 font-bold rounded-xl hover:bg-blue-50 transition-colors shadow-lg"
+          >
+            Explore the 2024 Survey
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+          </a>
+        </section>
       </main>
 
+      {/* Accessibility Modal */}
       {isAccessibilityOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" role="dialog" aria-modal="true">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 max-w-lg w-full shadow-2xl relative">
-            <h2 className="text-2xl font-bold mb-4">{t.accessibilityTitle}</h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md" role="dialog" aria-modal="true" onClick={() => setIsAccessibilityOpen(false)}>
+          <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 max-w-lg w-full shadow-2xl relative border border-slate-200 dark:border-slate-700 animate-in zoom-in-95" onClick={e => e.stopPropagation()}>
+            <div className="flex justify-between items-start mb-6">
+              <h2 className="text-2xl font-bold">{t.accessibilityTitle}</h2>
+              <button onClick={() => setIsAccessibilityOpen(false)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
             <p className="text-slate-600 dark:text-slate-300 leading-relaxed mb-8">
               {t.accessibilityContent}
             </p>
+            <div className="grid grid-cols-2 gap-4 mb-8">
+              <div className="p-4 bg-slate-50 dark:bg-slate-700/30 rounded-2xl">
+                <span className="block text-[10px] font-bold text-blue-600 uppercase mb-1">Theme</span>
+                <span className="text-xs font-semibold">Alt + Shift + T</span>
+              </div>
+              <div className="p-4 bg-slate-50 dark:bg-slate-700/30 rounded-2xl">
+                <span className="block text-[10px] font-bold text-blue-600 uppercase mb-1">Search</span>
+                <span className="text-xs font-semibold">Alt + Shift + S</span>
+              </div>
+              <div className="p-4 bg-slate-50 dark:bg-slate-700/30 rounded-2xl">
+                <span className="block text-[10px] font-bold text-blue-600 uppercase mb-1">Language</span>
+                <span className="text-xs font-semibold">Alt + Shift + L</span>
+              </div>
+              <div className="p-4 bg-slate-50 dark:bg-slate-700/30 rounded-2xl">
+                <span className="block text-[10px] font-bold text-blue-600 uppercase mb-1">Font</span>
+                <span className="text-xs font-semibold">Alt + Shift + F</span>
+              </div>
+            </div>
             <button 
               onClick={() => setIsAccessibilityOpen(false)}
-              className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-colors"
+              className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl transition-all shadow-lg shadow-blue-500/20 active:scale-[0.98]"
             >
               {t.closeLabel}
             </button>
@@ -288,21 +417,30 @@ const App: React.FC = () => {
         </div>
       )}
 
-      <footer className="bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-12 px-4" role="contentinfo">
-        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8">
+      <footer className="bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 py-16 px-4" role="contentinfo">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-12">
           <div className="text-center md:text-left">
-            <p className="font-bold text-lg">DevLearning Hub</p>
+            <p className="font-bold text-2xl tracking-tight mb-2">DevLearning Hub</p>
             <p className="text-slate-500 text-sm">© {t.footerRights}</p>
           </div>
-          <div className="flex flex-col items-center md:items-end gap-2">
-            <button 
-              onClick={() => setIsAccessibilityOpen(true)}
-              className="text-xs font-bold text-blue-600 dark:text-blue-400 underline mb-2 hover:text-blue-700 transition-colors"
-            >
-              {t.accessibilityTitle}
-            </button>
-            <a href="mailto:goldnoamai@gmail.com" className="text-blue-600 dark:text-blue-400 hover:underline text-sm font-medium">
-              {t.feedback}: goldnoamai@gmail.com
+          <div className="flex flex-col items-center md:items-end gap-4">
+            <div className="flex gap-4">
+              <button 
+                onClick={() => setIsAccessibilityOpen(true)}
+                className="text-xs font-bold text-slate-500 hover:text-blue-600 transition-colors bg-white dark:bg-slate-800 px-4 py-2 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700"
+              >
+                {t.accessibilityTitle}
+              </button>
+              <button 
+                onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                className="text-xs font-bold text-slate-500 hover:text-blue-600 transition-colors bg-white dark:bg-slate-800 px-4 py-2 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700"
+              >
+                Back to Top
+              </button>
+            </div>
+            <a href="mailto:goldnoamai@gmail.com" className="text-blue-600 dark:text-blue-400 hover:underline text-sm font-bold flex items-center gap-2">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+              {t.feedback}
             </a>
           </div>
         </div>
